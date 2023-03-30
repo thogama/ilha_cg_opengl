@@ -1,5 +1,8 @@
 #include <GL/glut.h>
 
+
+//gcc main.cpp -o main -lGL -lGLU -lglut -- para rodar
+
 float ver[8][3] = 
 {
     {-1.0,-1.0,1.0},
