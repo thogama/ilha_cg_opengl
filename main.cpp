@@ -1,4 +1,4 @@
-#include <glut.h>
+#include <GL/glut.h>
 #include <cmath>
 // gcc main.cpp -o main -lGL -lGLU -lglut -- para rodar
 
@@ -172,13 +172,32 @@ void terra(float porcentagem)
             if (cubos < numCubos)
             {
 
-                if (log10(i * k) > 0)
+                if (i * k > 0)
                 {
-                    desenhaCubo(i, k, log10(i * k) + 1, 0.5, borda, cor);
-                                }
+                    desenhaCubo(i, k, sqrt(pow(sin(i * k), 2)) + 1, 0.5, borda, cor);
+                    float aux = 0.75;
+                    while (aux < sqrt(pow(sin(i * k), 2)) + 1)
+                    {
+                        desenhaCubo(i, k, aux, 0.5, borda, cor);
+                        aux += 0.5;
+                    }
+                }
                 else
                 {
-                    desenhaCubo(i, k, 0.5, 0.5, borda, cor);
+                    if (i == 0)
+                    {
+                        desenhaCubo(i, k, cos(k) * sin(k) + 1, 0.5, borda, cor);
+                    }
+                    else
+                    {
+                        desenhaCubo(i, k, cos(i) * sin(i), 0.5, borda, cor);
+                    }
+                    float aux = 0.75;
+                    while (aux < sqrt(pow(sin(i * k), 2)) + 1)
+                    {
+                        desenhaCubo(i, k, aux, 0.5, borda, cor);
+                        aux += 0.5;
+                    }
                 }
                 // if ((cos(i) * sin(k) * cos(k + i) + 1) > 1)
                 // {
@@ -258,7 +277,7 @@ void display()
     // drawAxes(10.0); // desenha os eixos
     base();
     agua();
-    terra(10);
+    terra(75);
     glutSwapBuffers();
 }
 
