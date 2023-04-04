@@ -1,17 +1,87 @@
 #include <glut.h>
-
+#include <cmath>
 // gcc main.cpp -o main -lGL -lGLU -lglut -- para rodar
+
+void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloat cor[3])
+{
+    glColor3f(borda[0], borda[1], borda[2]);
+    glBegin(GL_LINE_STRIP);
+
+    glVertex3f(x, y, z);
+    glVertex3f(x + lado, y, z);
+    glVertex3f(x + lado, y + lado, z);
+    glVertex3f(x, y + lado, z);
+
+    glVertex3f(x, y, z + lado);
+    glVertex3f(x, y + lado, z + lado);
+    glVertex3f(x + lado, y + lado, z + lado);
+    glVertex3f(x + lado, y, z + lado);
+
+    glVertex3f(x, y, z);
+    glVertex3f(x, y, z + lado);
+    glVertex3f(x + lado, y, z + lado);
+    glVertex3f(x + lado, y, z);
+
+    glVertex3f(x, y + lado, z);
+    glVertex3f(x + lado, y + lado, z);
+    glVertex3f(x + lado, y + lado, z + lado);
+    glVertex3f(x, y + lado, z + lado);
+
+    glVertex3f(x, y, z);
+    glVertex3f(x, y + lado, z);
+    glVertex3f(x, y + lado, z + lado);
+    glVertex3f(x, y, z + lado);
+
+    glVertex3f(x + lado, y, z);
+    glVertex3f(x + lado, y + lado, z);
+    glVertex3f(x + lado, y + lado, z + lado);
+    glVertex3f(x + lado, y, z + lado);
+    glEnd();
+    glColor3f(cor[0], cor[1], cor[2]);
+    glBegin(GL_QUADS);
+
+    glVertex3f(x, y, z);
+    glVertex3f(x + lado, y, z);
+    glVertex3f(x + lado, y + lado, z);
+    glVertex3f(x, y + lado, z);
+
+    glVertex3f(x, y, z + lado);
+    glVertex3f(x, y + lado, z + lado);
+    glVertex3f(x + lado, y + lado, z + lado);
+    glVertex3f(x + lado, y, z + lado);
+
+    glVertex3f(x, y, z);
+    glVertex3f(x, y, z + lado);
+    glVertex3f(x + lado, y, z + lado);
+    glVertex3f(x + lado, y, z);
+
+    glVertex3f(x, y + lado, z);
+    glVertex3f(x + lado, y + lado, z);
+    glVertex3f(x + lado, y + lado, z + lado);
+    glVertex3f(x, y + lado, z + lado);
+
+    glVertex3f(x, y, z);
+    glVertex3f(x, y + lado, z);
+    glVertex3f(x, y + lado, z + lado);
+    glVertex3f(x, y, z + lado);
+
+    glVertex3f(x + lado, y, z);
+    glVertex3f(x + lado, y + lado, z);
+    glVertex3f(x + lado, y + lado, z + lado);
+    glVertex3f(x + lado, y, z + lado);
+    glEnd();
+};
 
 float basePontos[8][3] =
     {
-        {0.0, 0.0, 0.0}, //a
-        {8, 0, 0.0}, //b
-        {0.0, 12, 0.0}, //c
-        {8, 12, 0.0}, //d
-        {0.0, 0.0, 10}, //e
-        {8, 0, 10}, //f
-        {0.0, 12, 10}, //g
-        {8, 12, 10},  //h
+        {0.0, 0.0, 0.0}, // a {0,0,0}
+        {8, 0, 0.0},     // b {x,0,0}
+        {0.0, 12, 0.0},  // c {0,y,0}
+        {8, 12, 0.0},    // d {x,y,0}
+        {0.0, 0.0, 10},  // e {x,0,z}
+        {8, 0, 10},      // f {0,y,z}
+        {0.0, 12, 10},   // g {x,0,z}
+        {8, 12, 10},     // h {x,y,z}
 };
 
 void base()
@@ -58,6 +128,71 @@ void base()
     glEnd();
 }
 
+float comprimento = sqrt(pow(basePontos[1][0] - basePontos[0][0], 2) + pow(basePontos[1][1] - basePontos[0][1], 2) + pow(basePontos[1][2] - basePontos[0][2], 2));
+float largura = sqrt(pow(basePontos[2][0] - basePontos[0][0], 2) + pow(basePontos[2][1] - basePontos[0][1], 2) + pow(basePontos[2][2] - basePontos[0][2], 2));
+float altura = sqrt(pow(basePontos[4][0] - basePontos[0][0], 2) + pow(basePontos[4][1] - basePontos[0][1], 2) + pow(basePontos[4][2] - basePontos[0][2], 2));
+
+float area()
+{
+    return comprimento * largura;
+}
+
+float mover_agua = 0;
+void agua()
+{
+    for (float i = 0; i < comprimento; i += 0.5)
+    {
+        for (float k = 0; k < largura; k += 0.5)
+        {
+            GLfloat cor[3] = {31.0f / 255, 12.0f / 255, 243.0f / 255};
+            GLfloat borda[3] = {1, 1, 1};
+            desenhaCubo(i, k, cos(i * mover_agua) / 10 * sin(k * mover_agua), 0.5, borda, cor);
+        }
+    }
+}
+
+void terra(float porcentagem)
+{
+    // calcular tamanho do quadrado baseado na porcentagem
+    int numCubos = ceil(porcentagem / 100 * area());
+
+    GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
+    GLfloat borda[3] = {0, 0, 0};
+
+    // posição inicial da ilha
+    float posX = 0;
+    float posY = 0;
+    float cubos = 0;
+
+    for (float i = 0; i < comprimento; i += 0.5)
+    {
+        for (float k = 0; k < largura; k += 0.5)
+        {
+
+            if (cubos < numCubos)
+            {
+
+                if (log10(i * k) > 0)
+                {
+                    desenhaCubo(i, k, log10(i * k) + 1, 0.5, borda, cor);
+                                }
+                else
+                {
+                    desenhaCubo(i, k, 0.5, 0.5, borda, cor);
+                }
+                // if ((cos(i) * sin(k) * cos(k + i) + 1) > 1)
+                // {
+                //     float aux = 0;
+                //     while (aux <= (cos(i) * sin(k) * cos(k + i) + 1))
+                //     {
+                //         aux+=0.5;
+                //     }
+                // }
+                cubos += 0.25;
+            }
+        }
+    }
+}
 void drawAxes(float size)
 {
     // Eixo X (vermelho)
@@ -112,15 +247,18 @@ void display()
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
     gluLookAt(
         15, 15, 15,
         6, 6, 6,
         0, 0, 1);
-    drawAxes(2.0f);
+    drawAxes(5.0f);
 
-    glRotatef(rotate_z, 0, 0.0, 1);
+    glRotatef(rotate_z, 0, 0, 1);
     // drawAxes(10.0); // desenha os eixos
     base();
+    agua();
+    terra(10);
     glutSwapBuffers();
 }
 
@@ -128,7 +266,7 @@ void idleFunc()
 {
     // Atualiza o ângulo de rotação
     rotate_z += 0.1;
-
+    mover_agua += 0.01;
     // Redesenha a cena
     glutPostRedisplay();
 }
@@ -143,6 +281,5 @@ int main(int argc, char **argv)
     glutSpecialFunc(specialKeys);
     glEnable(GL_DEPTH_TEST);
     glutMainLoop();
-
     return 0;
 }
