@@ -237,18 +237,20 @@ void drawAxes(float size)
     glEnd();
 }
 
-double rotate_z = 0;
+double camera_x = 0;
+double camera_y = 0;
+
 
 void specialKeys(int key, int x, int y)
 {
     if (key == GLUT_KEY_RIGHT)
-        rotate_z += 5;
+        camera_x += 5;
     else if (key == GLUT_KEY_LEFT)
-        rotate_z -= 5;
-    // else if (key == GLUT_KEY_UP)
-    //     rotate_x += 1;
-    // else if (key == GLUT_KEY_DOWN)
-    //     rotate_x -= 1;
+        camera_x -= 5;
+    else if (key == GLUT_KEY_UP)
+        camera_y+= 5;
+    else if (key == GLUT_KEY_DOWN)
+        camera_y-= 5;
     glutPostRedisplay();
 }
 
@@ -273,18 +275,16 @@ void display()
         0, 0, 1);
     drawAxes(5.0f);
 
-    glRotatef(rotate_z, 0, 0, 1);
     // drawAxes(10.0); // desenha os eixos
     base();
     agua();
-    terra(75);
+    terra(100);
     glutSwapBuffers();
 }
 
 void idleFunc()
 {
     // Atualiza o ângulo de rotação
-    rotate_z += 0.1;
     mover_agua += 0.01;
     // Redesenha a cena
     glutPostRedisplay();
@@ -293,7 +293,7 @@ int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
-    glutInitWindowSize(640, 480);
+    glutInitWindowSize(1280,720);
     glutCreateWindow("GLUT");
     glutDisplayFunc(display);
     glutIdleFunc(idleFunc);
