@@ -270,8 +270,8 @@ void display()
     glLoadIdentity();
 
     gluLookAt(
-        15, 15, 15,
-        6, 6, 6,
+        15+camera_x, 15+camera_y, 15,
+        comprimento/2,largura/2, altura/2,
         0, 0, 1);
     drawAxes(5.0f);
 
