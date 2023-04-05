@@ -1,4 +1,4 @@
-#include <GL/glut.h>
+#include <glut.h>
 #include <cmath>
 // gcc main.cpp -o main -lGL -lGLU -lglut -- para rodar
 
@@ -237,21 +237,36 @@ void drawAxes(float size)
     glEnd();
 }
 
-double camera_x = 0;
-double camera_y = 0;
-
-
-void specialKeys(int key, int x, int y)
+float cameraX = 15;
+float cameraY = 15;
+float cameraZ = 15;
+float cameraAngleY = 0;
+float cameraAngleX = 0;
+float rotate = 0;
+float rotateKey = 0;
+void keyboard(unsigned char key, int x, int y)
 {
-    if (key == GLUT_KEY_RIGHT)
-        camera_x += 5;
-    else if (key == GLUT_KEY_LEFT)
-        camera_x -= 5;
-    else if (key == GLUT_KEY_UP)
-        camera_y+= 5;
-    else if (key == GLUT_KEY_DOWN)
-        camera_y-= 5;
-    glutPostRedisplay();
+    switch (key)
+    {
+    case 'w':
+        cameraX += 1 * sin(cameraAngleY);
+        cameraY += 1 * sin(cameraAngleX);
+        cameraZ -= 1 * cos(cameraAngleY);
+        break;
+    case 's':
+        cameraX -= 1 * sin(cameraAngleY);
+        cameraY -= 1 * sin(cameraAngleX);
+        cameraZ += 1 * cos(cameraAngleY);
+        break;
+    case 'a':
+        // virar a câmera para a esquerda
+        rotate -= 1;
+        break;
+    case 'd':
+        // virar a câmera para a direita
+        rotate += 1;
+        break;
+    }
 }
 
 void display()
@@ -269,13 +284,13 @@ void display()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    gluLookAt(
-        15+camera_x, 15+camera_y, 15,
-        comprimento/2,largura/2, altura/2,
-        0, 0, 1);
+    double cameraTargetX = comprimento / 2 + sin(cameraAngleY) * cos(cameraAngleX);
+    double cameraTargetY = largura / 2 + sin(cameraAngleX);
+    double cameraTargetZ = altura / 2 - cos(cameraAngleY) * cos(cameraAngleX);
+    gluLookAt(cameraX, cameraY, cameraZ, cameraTargetX, cameraTargetY + rotate, cameraTargetZ, 0, 0, 1);
     drawAxes(5.0f);
 
-    // drawAxes(10.0); // desenha os eixos
+    glRotatef(6 * rotateKey, 0, 0, 1);
     base();
     agua();
     terra(100);
@@ -293,11 +308,11 @@ int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
-    glutInitWindowSize(1280,720);
+    glutInitWindowSize(1280, 720);
     glutCreateWindow("GLUT");
     glutDisplayFunc(display);
     glutIdleFunc(idleFunc);
-    glutSpecialFunc(specialKeys);
+    glutKeyboardFunc(keyboard);
     glEnable(GL_DEPTH_TEST);
     glutMainLoop();
     return 0;
