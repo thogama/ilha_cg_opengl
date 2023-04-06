@@ -167,13 +167,61 @@ bool haCelulasLivres(bool **areaOcupada, int largura, int comprimento)
     return false;
 }
 
-void terra(float porcentagem)
+void coqueiro(float x, float y, float z)
+{
+    GLfloat borda[3] = {1, 1, 1};
+    GLfloat folha[3] = {0, 128, 0};
+    GLfloat madeira[3] = {141.0f / 255, 90.0f / 255, 0.0f};
+
+    float aux = 0;
+    while (aux < z)
+    {
+        desenhaCubo(x, y, aux, 0.5, borda, madeira);
+        aux += 0.5;
+    }
+    desenhaCubo(x, y, aux + 0.5, 0.5, borda, folha);
+
+    desenhaCubo(x + 0.5, y, aux, 0.5, borda, folha);
+    desenhaCubo(x + 1, y, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 1, y, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x - 0.5, y, aux - 1.5, 0.5, borda, folha);
+
+    desenhaCubo(x + 0.5, y + 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 0.5, y + 0.5, aux - 1, 0.5, borda, folha);
+
+    desenhaCubo(x - 0.5, y, aux, 0.5, borda, folha);
+    desenhaCubo(x - 1, y, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 1, y, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + 0.5, y, aux - 1.5, 0.5, borda, folha);
+
+    desenhaCubo(x - 0.5, y - 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 0.5, y - 0.5, aux - 1, 0.5, borda, folha);
+
+    desenhaCubo(x, y - 0.5, aux, 0.5, borda, folha);
+    desenhaCubo(x, y - 1, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x, y - 1, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x, y + 0.5, aux - 1.5, 0.5, borda, folha);
+
+    desenhaCubo(x + 0.5, y - 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 0.5, y - 0.5, aux - 1, 0.5, borda, folha);
+
+    desenhaCubo(x, y + 0.5, aux, 0.5, borda, folha);
+    desenhaCubo(x, y + 1, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x, y + 1, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x, y - 0.5, aux - 1.5, 0.5, borda, folha);
+
+    desenhaCubo(x - 0.5, y + 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 0.5, y + 0.5, aux - 1, 0.5, borda, folha);
+}
+
+void terra(float porcentagem, int coqueiros, int samambaia)
 {
     int numCubos = ceil(porcentagem * area() / 100 / 2);
     GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
     GLfloat borda[3] = {0, 0, 0};
+    int coqueirosCont = 0;
 
-    srand(comprimento * largura * altura);
+    srand((comprimento * largura * altura));
 
     bool **areaOcupada = new bool *[(int)comprimento];
     for (int i = 0; i < comprimento; i++)
@@ -211,6 +259,12 @@ void terra(float porcentagem)
         desenhaCubo(centroX + 0.5, centroY + 0.5, alturaAtual, 0.5, borda, cor);
         desenhaCubo(centroX, centroY + 0.5, alturaAtual, 0.5, borda, cor);
         desenhaCubo(centroX + 0.5, centroY, alturaAtual, 0.5, borda, cor);
+
+        if (coqueirosCont < coqueiros)
+        {
+            coqueiro(centroX + 0.5, centroY, alturaAtual + altura / 2);
+            coqueirosCont++;
+        }
     }
 
     for (int i = 0; i < comprimento; i++)
@@ -301,7 +355,7 @@ void display()
     glRotatef(6 * rotateKey, 0, 0, 1);
     base();
     agua();
-    terra(10);
+    terra(50, 2, 3);
     glutSwapBuffers();
 }
 
