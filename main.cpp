@@ -167,54 +167,73 @@ bool haCelulasLivres(bool **areaOcupada, int largura, int comprimento)
     return false;
 }
 
+// void arbusto(float x, float y, float z){
+//     GLfloat borda[3] = {1, 1, 1};
+//     GLfloat folha[3] = {0, 128, 0};
+
+//     desenhaCubo(x,y,z,0.25,borda,folha);
+// }
+
+void arbusto(float x, float y, float z, bool **areaOcupada)
+{
+    GLfloat borda[3] = {1, 1, 1};
+    GLfloat folha[3] = {0, 128, 0};
+
+    if (!areaOcupada[(int)x][(int)y])
+    {
+        desenhaCubo(x, y, z, 0.25, borda, folha);
+    }
+}
+
+float mover_folhas = 0;
 void coqueiro(float x, float y, float z)
 {
     GLfloat borda[3] = {1, 1, 1};
     GLfloat folha[3] = {0, 128, 0};
     GLfloat madeira[3] = {141.0f / 255, 90.0f / 255, 0.0f};
 
-    float aux = 0;
+    float aux = 0.5;
     while (aux < z)
     {
         desenhaCubo(x, y, aux, 0.5, borda, madeira);
         aux += 0.5;
     }
-    desenhaCubo(x, y, aux + 0.5, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 4, y, aux + 0.5, 0.5, borda, folha);
 
-    desenhaCubo(x + 0.5, y, aux, 0.5, borda, folha);
-    desenhaCubo(x + 1, y, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x + 1, y, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 6, y, aux, 0.5, borda, folha);
+    desenhaCubo(x + 1 + cos(mover_folhas) / 2 / 8, y, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 1 + cos(mover_folhas) / 2 / 10, y, aux - 1, 0.5, borda, folha);
     desenhaCubo(x - 0.5, y, aux - 1.5, 0.5, borda, folha);
 
-    desenhaCubo(x + 0.5, y + 0.5, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x + 0.5, y + 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 8, y + 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 10, y + 0.5, aux - 1, 0.5, borda, folha);
 
-    desenhaCubo(x - 0.5, y, aux, 0.5, borda, folha);
-    desenhaCubo(x - 1, y, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x - 1, y, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 6, y, aux, 0.5, borda, folha);
+    desenhaCubo(x - 1 + cos(mover_folhas) / 2 / 8, y, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 1 + cos(mover_folhas) / 2 / 10, y, aux - 1, 0.5, borda, folha);
     desenhaCubo(x + 0.5, y, aux - 1.5, 0.5, borda, folha);
 
-    desenhaCubo(x - 0.5, y - 0.5, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x - 0.5, y - 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 8, y - 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 10, y - 0.5, aux - 1, 0.5, borda, folha);
 
-    desenhaCubo(x, y - 0.5, aux, 0.5, borda, folha);
-    desenhaCubo(x, y - 1, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x, y - 1, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 6, y - 0.5, aux, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 8, y - 1, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 10, y - 1, aux - 1, 0.5, borda, folha);
     desenhaCubo(x, y + 0.5, aux - 1.5, 0.5, borda, folha);
 
-    desenhaCubo(x + 0.5, y - 0.5, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x + 0.5, y - 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 8, y - 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 10, y - 0.5, aux - 1, 0.5, borda, folha);
 
-    desenhaCubo(x, y + 0.5, aux, 0.5, borda, folha);
-    desenhaCubo(x, y + 1, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x, y + 1, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 6, y + 0.5, aux, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 8, y + 1, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 10, y + 1, aux - 1, 0.5, borda, folha);
     desenhaCubo(x, y - 0.5, aux - 1.5, 0.5, borda, folha);
 
-    desenhaCubo(x - 0.5, y + 0.5, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x - 0.5, y + 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 8, y + 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 10, y + 0.5, aux - 1, 0.5, borda, folha);
 }
 
-void terra(float porcentagem, int coqueiros, int samambaia)
+void terra(float porcentagem, int coqueiros, int arbusto)
 {
     int numCubos = ceil(porcentagem * area() / 100 / 2);
     GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
@@ -262,7 +281,23 @@ void terra(float porcentagem, int coqueiros, int samambaia)
 
         if (coqueirosCont < coqueiros)
         {
-            coqueiro(centroX + 0.5, centroY, alturaAtual + altura / 2);
+            int aux = rand() % 3;
+            switch (aux)
+            {
+            case 0:
+                coqueiro(centroX + 0.5, centroY, alturaAtual + altura / 2);
+                break;
+            case 1:
+                coqueiro(centroX + 0.5, centroY + 0.5, alturaAtual + altura / 2);
+
+                break;
+            case 2:
+                coqueiro(centroX, centroY + 0.5, alturaAtual + altura / 2);
+                break;
+            default:
+                coqueiro(centroX, centroY, alturaAtual + altura / 2);
+                break;
+            }
             coqueirosCont++;
         }
     }
@@ -355,7 +390,7 @@ void display()
     glRotatef(6 * rotateKey, 0, 0, 1);
     base();
     agua();
-    terra(50, 2, 3);
+    terra(75, 10, 3);
     glutSwapBuffers();
 }
 
@@ -363,6 +398,7 @@ void idleFunc()
 {
     // Atualiza o ângulo de rotação
     mover_agua += 0.01;
+    mover_folhas += 0.01;
     // Redesenha a cena
     glutPostRedisplay();
 }
