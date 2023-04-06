@@ -1,5 +1,6 @@
 #include <glut.h>
 #include <cmath>
+#include <time.h>
 // gcc main.cpp -o main -lGL -lGLU -lglut -- para rodar
 
 void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloat cor[3])
@@ -151,42 +152,65 @@ void agua()
     }
 }
 
-void terra(float porcentagem)
+bool haCelulasLivres(bool **areaOcupada, int largura, int comprimento)
 {
-    // calcular tamanho do quadrado baseado na porcentagem
-    int numCubos = ceil(porcentagem / 100 * area());
-
-    GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
-    GLfloat borda[3] = {0, 0, 0};
-
-    // posição inicial da ilha
-    float posX = 0;
-    float posY = 0;
-    float cubos = 0;
-
-    for (float i = 0; i < comprimento; i += 0.5)
+    for (int i = 0; i < largura; i++)
     {
-        for (float k = 0; k < largura; k += 0.5)
+        for (int j = 0; j < comprimento; j++)
         {
-
-            if (cubos < numCubos)
+            if (!areaOcupada[i][j])
             {
-
-                float altura = sin(sqrt(pow(i - comprimento / 2, 2) + pow(k - largura / 2, 2)) * 0.5) + 0.5;
-                desenhaCubo(i, k, altura, 0.5, borda, cor);
-
-                float aux = 0.75;
-                while (aux < altura)
-                {
-                    desenhaCubo(i, k, aux, 0.5, borda, cor);
-                    aux += 0.15;
-                }
-
-                cubos += 0.25;
+                return true;
             }
         }
     }
+    return false;
 }
+
+void terra(float porcentagem)
+{
+    int numCubos = ceil(porcentagem * area() / 100 / 2);
+    GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
+    GLfloat borda[3] = {0, 0, 0};
+
+    srand(time(NULL));
+
+    bool **areaOcupada = new bool *[(int)comprimento];
+    for (int i = 0; i < comprimento; i++)
+    {
+        areaOcupada[i] = new bool[(int)largura];
+        for (int j = 0; j < largura; j++)
+        {
+            areaOcupada[i][j] = false;
+        }
+    }
+
+    for (float i = 0; i < numCubos && haCelulasLivres(areaOcupada, comprimento, largura); i += 0.5)
+    {
+        int aleatorioX, aleatorioY;
+        do
+        {
+            aleatorioX = rand() % (int)comprimento;
+            aleatorioY = rand() % (int)largura;
+        } while (areaOcupada[aleatorioX][aleatorioY]);
+
+        areaOcupada[aleatorioX][aleatorioY] = true;
+        float centroX = aleatorioX;
+        float centroY = aleatorioY;
+
+        desenhaCubo(centroX, centroY, 1, 0.5, borda, cor);
+        desenhaCubo(centroX + 0.5, centroY + 0.5, 1, 0.5, borda, cor);
+        desenhaCubo(centroX, centroY + 0.5, 1, 0.5, borda, cor);
+        desenhaCubo(centroX + 0.5, centroY, 1, 0.5, borda, cor);
+    }
+
+    for (int i = 0; i < comprimento; i++)
+    {
+        delete[] areaOcupada[i];
+    }
+    delete[] areaOcupada;
+}
+
 void drawAxes(float size)
 {
     // Eixo X (vermelho)
