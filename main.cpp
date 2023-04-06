@@ -173,7 +173,7 @@ void terra(float porcentagem)
     GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
     GLfloat borda[3] = {0, 0, 0};
 
-    srand(time(NULL));
+    srand(comprimento * largura * altura);
 
     bool **areaOcupada = new bool *[(int)comprimento];
     for (int i = 0; i < comprimento; i++)
@@ -198,10 +198,19 @@ void terra(float porcentagem)
         float centroX = aleatorioX;
         float centroY = aleatorioY;
 
-        desenhaCubo(centroX, centroY, 1, 0.5, borda, cor);
-        desenhaCubo(centroX + 0.5, centroY + 0.5, 1, 0.5, borda, cor);
-        desenhaCubo(centroX, centroY + 0.5, 1, 0.5, borda, cor);
-        desenhaCubo(centroX + 0.5, centroY, 1, 0.5, borda, cor);
+        float alturaAtual = sin(centroX) * cos(centroY) + 1.5;
+
+        desenhaCubo(centroX, centroY, alturaAtual, 0.5, borda, cor);
+        for (float aux = 0.5; aux < alturaAtual; aux += 0.5)
+        {
+            desenhaCubo(centroX, centroY, aux, 0.5, borda, cor);
+            desenhaCubo(centroX + 0.5, centroY + 0.5, aux, 0.5, borda, cor);
+            desenhaCubo(centroX, centroY + 0.5, aux, 0.5, borda, cor);
+            desenhaCubo(centroX + 0.5, centroY, aux, 0.5, borda, cor);
+        }
+        desenhaCubo(centroX + 0.5, centroY + 0.5, alturaAtual, 0.5, borda, cor);
+        desenhaCubo(centroX, centroY + 0.5, alturaAtual, 0.5, borda, cor);
+        desenhaCubo(centroX + 0.5, centroY, alturaAtual, 0.5, borda, cor);
     }
 
     for (int i = 0; i < comprimento; i++)
@@ -292,7 +301,7 @@ void display()
     glRotatef(6 * rotateKey, 0, 0, 1);
     base();
     agua();
-    terra(80);
+    terra(10);
     glutSwapBuffers();
 }
 
