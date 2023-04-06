@@ -172,41 +172,16 @@ void terra(float porcentagem)
             if (cubos < numCubos)
             {
 
-                if (i * k > 0)
+                float altura = sin(sqrt(pow(i - comprimento / 2, 2) + pow(k - largura / 2, 2)) * 0.5) + 0.5;
+                desenhaCubo(i, k, altura, 0.5, borda, cor);
+
+                float aux = 0.75;
+                while (aux < altura)
                 {
-                    desenhaCubo(i, k, sqrt(pow(sin(i * k), 2)) + 1, 0.5, borda, cor);
-                    float aux = 0.75;
-                    while (aux < sqrt(pow(sin(i * k), 2)) + 1)
-                    {
-                        desenhaCubo(i, k, aux, 0.5, borda, cor);
-                        aux += 0.5;
-                    }
+                    desenhaCubo(i, k, aux, 0.5, borda, cor);
+                    aux += 0.15;
                 }
-                else
-                {
-                    if (i == 0)
-                    {
-                        desenhaCubo(i, k, cos(k) * sin(k) + 1, 0.5, borda, cor);
-                    }
-                    else
-                    {
-                        desenhaCubo(i, k, cos(i) * sin(i), 0.5, borda, cor);
-                    }
-                    float aux = 0.75;
-                    while (aux < sqrt(pow(sin(i * k), 2)) + 1)
-                    {
-                        desenhaCubo(i, k, aux, 0.5, borda, cor);
-                        aux += 0.5;
-                    }
-                }
-                // if ((cos(i) * sin(k) * cos(k + i) + 1) > 1)
-                // {
-                //     float aux = 0;
-                //     while (aux <= (cos(i) * sin(k) * cos(k + i) + 1))
-                //     {
-                //         aux+=0.5;
-                //     }
-                // }
+
                 cubos += 0.25;
             }
         }
@@ -293,7 +268,7 @@ void display()
     glRotatef(6 * rotateKey, 0, 0, 1);
     base();
     agua();
-    terra(100);
+    terra(80);
     glutSwapBuffers();
 }
 
