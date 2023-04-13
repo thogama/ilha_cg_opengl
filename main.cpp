@@ -129,9 +129,51 @@ void base()
     glEnd();
 }
 
-float comprimento = sqrt(pow(basePontos[1][0] - basePontos[0][0], 2) + pow(basePontos[1][1] - basePontos[0][1], 2) + pow(basePontos[1][2] - basePontos[0][2], 2));
-float largura = sqrt(pow(basePontos[2][0] - basePontos[0][0], 2) + pow(basePontos[2][1] - basePontos[0][1], 2) + pow(basePontos[2][2] - basePontos[0][2], 2));
-float altura = sqrt(pow(basePontos[4][0] - basePontos[0][0], 2) + pow(basePontos[4][1] - basePontos[0][1], 2) + pow(basePontos[4][2] - basePontos[0][2], 2));
+float comprimento = sqrt(pow(basePontos
+                                     [1][0] -
+                                 basePontos
+                                     [0][0],
+                             2) +
+                         pow(basePontos
+                                     [1][1] -
+                                 basePontos
+                                     [0][1],
+                             2) +
+                         pow(basePontos
+                                     [1][2] -
+                                 basePontos
+                                     [0][2],
+                             2));
+float largura = sqrt(pow(basePontos
+                                 [2][0] -
+                             basePontos
+                                 [0][0],
+                         2) +
+                     pow(basePontos
+                                 [2][1] -
+                             basePontos
+                                 [0][1],
+                         2) +
+                     pow(basePontos
+                                 [2][2] -
+                             basePontos
+                                 [0][2],
+                         2));
+float altura = sqrt(pow(basePontos
+                                [4][0] -
+                            basePontos
+                                [0][0],
+                        2) +
+                    pow(basePontos
+                                [4][1] -
+                            basePontos
+                                [0][1],
+                        2) +
+                    pow(basePontos
+                                [4][2] -
+                            basePontos
+                                [0][2],
+                        2));
 
 float area()
 {
@@ -174,14 +216,14 @@ bool haCelulasLivres(bool **areaOcupada, int largura, int comprimento)
 //     desenhaCubo(x,y,z,0.25,borda,folha);
 // }
 
-void arbusto(float x, float y, float z, bool **areaOcupada)
+void arbusto(float x, float y, float z, int cont)
 {
     GLfloat borda[3] = {1, 1, 1};
     GLfloat folha[3] = {0, 128, 0};
 
-    if (!areaOcupada[(int)x][(int)y])
+    if (cont != 0)
     {
-        desenhaCubo(x, y, z, 0.25, borda, folha);
+        desenhaCubo(x, y, z, 0.5, borda, folha);
     }
 }
 
@@ -233,13 +275,13 @@ void coqueiro(float x, float y, float z)
     desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 10, y + 0.5, aux - 1, 0.5, borda, folha);
 }
 
-void terra(float porcentagem, int coqueiros, int arbusto)
+void terra(float porcentagem, int coqueiros, int arbustos)
 {
     int numCubos = ceil(porcentagem * area() / 100 / 2);
     GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
     GLfloat borda[3] = {0, 0, 0};
     int coqueirosCont = 0;
-
+    int arbustosCont = 0;
     srand((comprimento * largura * altura));
 
     bool **areaOcupada = new bool *[(int)comprimento];
@@ -281,6 +323,8 @@ void terra(float porcentagem, int coqueiros, int arbusto)
 
         if (coqueirosCont < coqueiros)
         {
+            arbusto(centroX + 0.5, centroY + 1, alturaAtual + altura, arbustosCont);
+
             int aux = rand() % 3;
             switch (aux)
             {
@@ -293,6 +337,7 @@ void terra(float porcentagem, int coqueiros, int arbusto)
                 break;
             case 2:
                 coqueiro(centroX, centroY + 0.5, alturaAtual + altura / 2);
+
                 break;
             default:
                 coqueiro(centroX, centroY, alturaAtual + altura / 2);
@@ -390,7 +435,7 @@ void display()
     glRotatef(6 * rotateKey, 0, 0, 1);
     base();
     agua();
-    terra(75, 10, 3);
+    terra(100, 10, 3);
     glutSwapBuffers();
 }
 
