@@ -1,6 +1,7 @@
 #include <glut.h>
 #include <cmath>
 #include <time.h>
+#include <iostream>
 // gcc main.cpp -o main -lGL -lGLU -lglut -- para rodar
 
 void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloat cor[3])
@@ -209,27 +210,18 @@ bool haCelulasLivres(bool **areaOcupada, int largura, int comprimento)
     return false;
 }
 
-// void arbusto(float x, float y, float z){
-//     GLfloat borda[3] = {1, 1, 1};
-//     GLfloat folha[3] = {0, 128, 0};
-
-//     desenhaCubo(x,y,z,0.25,borda,folha);
-// }
-
-void arbusto(float x, float y, float z, int cont)
+void arbusto(float x, float y, float z)
 {
     GLfloat borda[3] = {1, 1, 1};
     GLfloat folha[3] = {0, 128, 0};
 
-    if (cont != 0)
-    {
-        desenhaCubo(x, y, z, 0.5, borda, folha);
-    }
+    desenhaCubo(x, y, z, 0.25, borda, folha);
 }
 
 float mover_folhas = 0;
 void coqueiro(float x, float y, float z)
 {
+
     GLfloat borda[3] = {1, 1, 1};
     GLfloat folha[3] = {0, 128, 0};
     GLfloat madeira[3] = {141.0f / 255, 90.0f / 255, 0.0f};
@@ -278,17 +270,19 @@ void coqueiro(float x, float y, float z)
 void terra(float porcentagem, int coqueiros, int arbustos)
 {
     int numCubos = ceil(porcentagem * area() / 100 / 2);
+    int numArbusto = arbustos;
     GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
     GLfloat borda[3] = {0, 0, 0};
     int coqueirosCont = 0;
     int arbustosCont = 0;
+
     srand((comprimento * largura * altura));
 
-    bool **areaOcupada = new bool *[(int)comprimento];
-    for (int i = 0; i < comprimento; i++)
+    bool **areaOcupada = new bool *[(int)comprimento * 2];
+    for (int i = 0; i < comprimento * 2; i++)
     {
-        areaOcupada[i] = new bool[(int)largura];
-        for (int j = 0; j < largura; j++)
+        areaOcupada[i] = new bool[(int)largura * 2];
+        for (int j = 0; j < largura * 2; j++)
         {
             areaOcupada[i][j] = false;
         }
@@ -321,11 +315,9 @@ void terra(float porcentagem, int coqueiros, int arbustos)
         desenhaCubo(centroX, centroY + 0.5, alturaAtual, 0.5, borda, cor);
         desenhaCubo(centroX + 0.5, centroY, alturaAtual, 0.5, borda, cor);
 
+        int aux = rand() % 3;
         if (coqueirosCont < coqueiros)
         {
-            arbusto(centroX + 0.5, centroY + 1, alturaAtual + altura, arbustosCont);
-
-            int aux = rand() % 3;
             switch (aux)
             {
             case 0:
@@ -344,6 +336,25 @@ void terra(float porcentagem, int coqueiros, int arbustos)
                 break;
             }
             coqueirosCont++;
+        }
+        if (arbustosCont < arbustos)
+        {
+            switch (aux)
+            {
+            case 0:
+                arbusto(centroX, centroY + 0.5, alturaAtual + 0.5);
+                break;
+            case 1:
+                arbusto(centroX, centroY, alturaAtual + 0.5);
+                break;
+            case 2:
+                arbusto(centroX + 0.5, centroY, alturaAtual + 0.5);
+                break;
+            default:
+                arbusto(centroX + 0.5, centroY + 0.5, alturaAtual + 0.5);
+                break;
+            }
+            arbustosCont++;
         }
     }
 
@@ -435,7 +446,7 @@ void display()
     glRotatef(6 * rotateKey, 0, 0, 1);
     base();
     agua();
-    terra(100, 10, 3);
+    terra(50, 3, 100);
     glutSwapBuffers();
 }
 
