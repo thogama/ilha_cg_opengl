@@ -2,7 +2,78 @@
 #include <cmath>
 #include <time.h>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
 // gcc main.cpp -o main -lGL -lGLU -lglut -- para rodar
+std::ifstream arquivo("entrada.txt");
+std::string linha;
+void lerArquivo()
+{
+    std::string X, Y, Z, lixo, ilha, lagos, terrestres_1, terrestres_2, plantas_1, plantas_2;
+
+    int cont = 0;
+    while (getline(arquivo, linha))
+    {
+        std::stringstream ss(linha);
+        std::cout << "Linha: " << linha << "\n";
+        switch (cont)
+        {
+        case 0:
+            ss >> lixo >> X >> Y >> Z;
+            std::cout << "Valores de X, Y, Z: " << X << ", " << Y << ", " << Z << "\n";
+            break;
+        case 1:
+            ss >> lixo >> ilha;
+            std::cout << "Valor de ilha: " << ilha << "\n";
+            break;
+
+        case 2:
+            ss >> lixo >> lagos;
+            std::cout << "Valor de lagos: " << lagos << "\n";
+            break;
+
+        case 3:
+            ss >> lixo >> terrestres_1;
+            std::cout << "Valor de terrestres_1: " << terrestres_1 << "\n";
+            break;
+
+        case 4:
+            ss >> lixo >> terrestres_2;
+            std::cout << "Valor de terrestres_2: " << terrestres_2 << "\n";
+            break;
+
+        case 5:
+            ss >> lixo >> plantas_1;
+            std::cout << "Valor de plantas_1: " << plantas_1 << "\n";
+            break;
+
+        case 6:
+            ss >> lixo >> plantas_2;
+            std::cout << "Valor de plantas_2: " << plantas_2 << "\n";
+            break;
+        }
+        cont++;
+    }
+    arquivo.close();
+}
+
+float comprimento = 10;
+float largura = 10;
+float altura = 10;
+
+float basePontos[8][3] =
+    {
+        {0.0, 0.0, 0.0},                // a {0,0,0}
+        {comprimento, 0, 0.0},          // b {x,0,0}
+        {0.0, largura, 0.0},            // c {0,y,0}
+        {comprimento, largura, 0.0},    // d {x,y,0}
+        {0.0, 0.0, altura},             // e {0,0,z}
+        {comprimento, 0, altura},       // f {x,0,z}
+        {0.0, largura, altura},         // g {0,y,z}
+        {comprimento, largura, altura}, // h {x,y,z}
+};
 
 void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloat cor[3])
 {
@@ -74,18 +145,6 @@ void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloa
     glEnd();
 };
 
-float basePontos[8][3] =
-    {
-        {0.0, 0.0, 0.0}, // a {0,0,0}
-        {8, 0, 0.0},     // b {x,0,0}
-        {0.0, 12, 0.0},  // c {0,y,0}
-        {8, 12, 0.0},    // d {x,y,0}
-        {0.0, 0.0, 10},  // e {x,0,z}
-        {8, 0, 10},      // f {0,y,z}
-        {0.0, 12, 10},   // g {x,0,z}
-        {8, 12, 10},     // h {x,y,z}
-};
-
 void base()
 {
     glBegin(GL_LINES);
@@ -130,52 +189,6 @@ void base()
     glEnd();
 }
 
-float comprimento = sqrt(pow(basePontos
-                                     [1][0] -
-                                 basePontos
-                                     [0][0],
-                             2) +
-                         pow(basePontos
-                                     [1][1] -
-                                 basePontos
-                                     [0][1],
-                             2) +
-                         pow(basePontos
-                                     [1][2] -
-                                 basePontos
-                                     [0][2],
-                             2));
-float largura = sqrt(pow(basePontos
-                                 [2][0] -
-                             basePontos
-                                 [0][0],
-                         2) +
-                     pow(basePontos
-                                 [2][1] -
-                             basePontos
-                                 [0][1],
-                         2) +
-                     pow(basePontos
-                                 [2][2] -
-                             basePontos
-                                 [0][2],
-                         2));
-float altura = sqrt(pow(basePontos
-                                [4][0] -
-                            basePontos
-                                [0][0],
-                        2) +
-                    pow(basePontos
-                                [4][1] -
-                            basePontos
-                                [0][1],
-                        2) +
-                    pow(basePontos
-                                [4][2] -
-                            basePontos
-                                [0][2],
-                        2));
-
 float area()
 {
     return comprimento * largura;
@@ -215,7 +228,7 @@ void arbusto(float x, float y, float z)
     GLfloat borda[3] = {1, 1, 1};
     GLfloat folha[3] = {0, 128, 0};
 
-    desenhaCubo(x, y, z, 0.25, borda, folha);
+    desenhaCubo(x + 0.125, y + 0.125, z, 0.25, borda, folha);
 }
 
 float mover_folhas = 0;
@@ -226,11 +239,11 @@ void coqueiro(float x, float y, float z)
     GLfloat folha[3] = {0, 128, 0};
     GLfloat madeira[3] = {141.0f / 255, 90.0f / 255, 0.0f};
 
-    float aux = 0.5;
+    float aux = 0.25;
     while (aux < z)
     {
-        desenhaCubo(x, y, aux, 0.5, borda, madeira);
-        aux += 0.5;
+        desenhaCubo(x + 0.125, y + 0.125, aux, 0.25, borda, madeira);
+        aux += 0.25;
     }
     desenhaCubo(x + cos(mover_folhas) / 2 / 4, y, aux + 0.5, 0.5, borda, folha);
 
@@ -446,7 +459,7 @@ void display()
     glRotatef(6 * rotateKey, 0, 0, 1);
     base();
     agua();
-    terra(50, 3, 100);
+    terra(50, 5, 5); // colocar entradas ainda
     glutSwapBuffers();
 }
 
@@ -460,6 +473,7 @@ void idleFunc()
 }
 int main(int argc, char **argv)
 {
+    lerArquivo();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(1280, 720);
