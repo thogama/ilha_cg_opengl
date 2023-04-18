@@ -283,7 +283,7 @@ void coqueiro(float x, float y, float z)
     GLfloat madeira[3] = {141.0f / 255, 90.0f / 255, 0.0f};
 
     float aux = 0.25;
-    float aleatorio = rand() % (int)z;
+    float aleatorio = rand() % (int)z/2;
     while (aux < aleatorio + 5)
     {
         desenhaCubo(x + 0.125, y + 0.125, aux, 0.25, borda, madeira);

@@ -1,7 +1,7 @@
-cena 5 5 5
-ilha 70
-lagos 20
-terrestres_1 2 
-terrestres_2 3 
-plantas_1 1
-plantas_2 2
+cena 10 10 10
+ilha 60
+lagos 80
+terrestres_1 10 
+terrestres_2 5 
+plantas_1 15
+plantas_2 500
