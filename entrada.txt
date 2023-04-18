@@ -1,5 +1,5 @@
 cena 10 10 10
-ilha 60
+ilha 10
 lagos 80
 terrestres_1 10 
 terrestres_2 5 

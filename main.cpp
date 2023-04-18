@@ -18,6 +18,14 @@ float terrestres_2;
 float plantas_1;
 float plantas_2;
 
+struct Bloco
+{
+    bool colisao;
+    float altura;
+};
+
+Bloco **colisao;
+
 struct ValoresArquivo
 {
     std::string X;
@@ -31,8 +39,7 @@ struct ValoresArquivo
     std::string plantas_2;
 };
 
-void lerArquivo(std::string nome_arquivo, float &saida_X, float &saida_Y, float &saida_Z,
-                float &saida_ilha, float &saida_lagos, float &saida_terrestes_1, float &saida_terrestes_2, float &saida_plantas_1, float &saida_plantas_2)
+void lerArquivo(std::string nome_arquivo, float &saida_X, float &saida_Y, float &saida_Z, float &saida_ilha, float &saida_lagos, float &saida_terrestes_1, float &saida_terrestes_2, float &saida_plantas_1, float &saida_plantas_2)
 {
     ValoresArquivo valores;
 
@@ -95,20 +102,38 @@ void lerArquivo(std::string nome_arquivo, float &saida_X, float &saida_Y, float 
 
     arquivo.close();
 }
-// float X = X;
-// float Y = Y;
-// float altura = Z;
-// float basePontos[8][3] =
-//     {
-//         {0.0, 0.0, 0.0}, // a {0,0,0}0
-//         {X, 0, 0.0},     // b {x,0,0}1
-//         {0.0, Y, 0.0},   // c {0,y,0}2
-//         {X, Y, 0.0},     // d {x,y,0}3
-//         {0.0, 0.0, Z},   // e {0,0,z}4
-//         {X, 0, Z},       // f {x,0,z}5
-//         {0.0, Y, Z},     // g {0,y,z}6
-//         {X, Y, Z},       // h {x,y,z}7
-// };
+
+void inicializaColisao(Bloco **&colisao, int X, int Y)
+{
+    colisao = new Bloco *[(int)X * 2];
+
+    for (int i = 0; i < X * 2; i++)
+    {
+        colisao[i] = new Bloco[(int)Y * 2];
+        for (int j = 0; j < Y * 2; j++)
+        {
+            colisao[i][j].colisao = false;
+            colisao[i][j].altura = 0;
+        }
+    }
+}
+void imprimirMatrizColisao(Bloco **colisao, int X, int Y)
+{
+    for (int j = Y * 2 - 1; j >= 0; j--)
+    {
+        for (int i = 0; i < X * 2; i++)
+        {
+            if (colisao[i][j].colisao)
+                std::cout << "X";
+            else
+                std::cout << "O";
+            std::cout << "[" << colisao[i][j].altura << "] ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "\n"
+              << std::endl;
+}
 
 void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloat cor[3])
 {
@@ -179,6 +204,23 @@ void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloa
     glVertex3f(x + lado, y, z + lado);
     glEnd();
 };
+
+float mover_terrestre_1;
+
+void terrestre_1(float x, float y, float z, Bloco **colisao)
+{
+
+    GLfloat cor[3] = {1, 0, 0};
+    GLfloat borda[3] = {1, 1, 1};
+    desenhaCubo(x + 0.125 + mover_terrestre_1, y + 0.125, z + 0.25, 0.25, borda, cor);
+}
+
+void terrestre_2(float x, float y, float z)
+{
+    GLfloat cor[3] = {0, 0, 1};
+    GLfloat borda[3] = {1, 1, 1};
+    desenhaCubo(x + 0.125, y + 0.125, z + 1, 0.25, borda, cor);
+}
 
 void base(float X, float Y, float Z)
 {
@@ -283,45 +325,45 @@ void coqueiro(float x, float y, float z)
     GLfloat madeira[3] = {141.0f / 255, 90.0f / 255, 0.0f};
 
     float aux = 0.25;
-    float aleatorio = rand() % (int)z/2;
+    float aleatorio = rand() % (int)z / 2;
     while (aux < aleatorio + 5)
     {
         desenhaCubo(x + 0.125, y + 0.125, aux, 0.25, borda, madeira);
         aux += 0.25;
     }
-    desenhaCubo(x + cos(mover_folhas) / 2 / 4, y, aux + 0.5, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 4, y, aux + 0.25, 0.5, borda, folha);
 
-    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 6, y, aux, 0.5, borda, folha);
-    desenhaCubo(x + 1 + cos(mover_folhas) / 2 / 8, y, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x + 1 + cos(mover_folhas) / 2 / 10, y, aux - 1, 0.5, borda, folha);
-    desenhaCubo(x - 0.5, y, aux - 1.5, 0.5, borda, folha);
+    desenhaCubo(x + 0.25 + cos(mover_folhas) / 2 / 6, y, aux, 0.5, borda, folha);
+    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 8, y, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 10, y, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x - 0.25, y, aux - 1.5, 0.5, borda, folha);
 
-    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 8, y + 0.5, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 10, y + 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + 0.25 + cos(mover_folhas) / 2 / 8, y + 0.25, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 0.25 + cos(mover_folhas) / 2 / 10, y + 0.25, aux - 1, 0.5, borda, folha);
 
-    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 6, y, aux, 0.5, borda, folha);
-    desenhaCubo(x - 1 + cos(mover_folhas) / 2 / 8, y, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x - 1 + cos(mover_folhas) / 2 / 10, y, aux - 1, 0.5, borda, folha);
-    desenhaCubo(x + 0.5, y, aux - 1.5, 0.5, borda, folha);
+    desenhaCubo(x - 0.25 + cos(mover_folhas) / 2 / 6, y, aux, 0.5, borda, folha);
+    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 8, y, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 10, y, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + 0.25, y, aux - 1.5, 0.5, borda, folha);
 
-    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 8, y - 0.5, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 10, y - 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x - 0.25 + cos(mover_folhas) / 2 / 8, y - 0.25, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 0.25 + cos(mover_folhas) / 2 / 10, y - 0.25, aux - 1, 0.5, borda, folha);
 
-    desenhaCubo(x + cos(mover_folhas) / 2 / 6, y - 0.5, aux, 0.5, borda, folha);
-    desenhaCubo(x + cos(mover_folhas) / 2 / 8, y - 1, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x + cos(mover_folhas) / 2 / 10, y - 1, aux - 1, 0.5, borda, folha);
-    desenhaCubo(x, y + 0.5, aux - 1.5, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 6, y - 0.25, aux, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 8, y - 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 10, y - 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x, y + 0.25, aux - 1.5, 0.5, borda, folha);
 
-    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 8, y - 0.5, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x + 0.5 + cos(mover_folhas) / 2 / 10, y - 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x + 0.25 + cos(mover_folhas) / 2 / 8, y - 0.25, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + 0.25 + cos(mover_folhas) / 2 / 10, y - 0.25, aux - 1, 0.5, borda, folha);
 
-    desenhaCubo(x + cos(mover_folhas) / 2 / 6, y + 0.5, aux, 0.5, borda, folha);
-    desenhaCubo(x + cos(mover_folhas) / 2 / 8, y + 1, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x + cos(mover_folhas) / 2 / 10, y + 1, aux - 1, 0.5, borda, folha);
-    desenhaCubo(x, y - 0.5, aux - 1.5, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 6, y + 0.25, aux, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 8, y + 0.5, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x + cos(mover_folhas) / 2 / 10, y + 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x, y - 0.25, aux - 1.5, 0.5, borda, folha);
 
-    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 8, y + 0.5, aux - 0.5, 0.5, borda, folha);
-    desenhaCubo(x - 0.5 + cos(mover_folhas) / 2 / 10, y + 0.5, aux - 1, 0.5, borda, folha);
+    desenhaCubo(x - 0.25 + cos(mover_folhas) / 2 / 8, y + 0.25, aux - 0.5, 0.5, borda, folha);
+    desenhaCubo(x - 0.25 + cos(mover_folhas) / 2 / 10, y + 0.25, aux - 1, 0.5, borda, folha);
 }
 
 void terra(float porcentagem, int coqueiros, int arbustos)
@@ -332,7 +374,6 @@ void terra(float porcentagem, int coqueiros, int arbustos)
     GLfloat borda[3] = {0, 0, 0};
     int coqueirosCont = 0;
     int arbustosCont = 0;
-
     srand((X * Y * Z));
 
     bool **areaOcupada = new bool *[(int)X * 2];
@@ -355,6 +396,10 @@ void terra(float porcentagem, int coqueiros, int arbustos)
         } while (areaOcupada[aleatorioX][aleatorioY]);
 
         areaOcupada[aleatorioX][aleatorioY] = true;
+        colisao[aleatorioX][aleatorioY].altura = sin(aleatorioX) * cos(aleatorioY) + 1.5;
+        colisao[aleatorioX][aleatorioY].colisao = true;
+        terrestre_1(aleatorioX, aleatorioY, sin(aleatorioX) * cos(aleatorioY) + 2, colisao);
+
         float centroX = aleatorioX;
         float centroY = aleatorioY;
 
@@ -371,7 +416,6 @@ void terra(float porcentagem, int coqueiros, int arbustos)
         desenhaCubo(centroX + 0.5, centroY + 0.5, alturaAtual, 0.5, borda, cor);
         desenhaCubo(centroX, centroY + 0.5, alturaAtual, 0.5, borda, cor);
         desenhaCubo(centroX + 0.5, centroY, alturaAtual, 0.5, borda, cor);
-
         int aux = rand() % 3;
         if (coqueirosCont < coqueiros)
         {
@@ -504,6 +548,7 @@ void display()
     base(X, Y, Z);
     agua();
     terra(ilha, plantas_1, plantas_2); // colocar entradas ainda
+    // imprimirMatrizColisao(colisao, X, Y);
     glutSwapBuffers();
 }
 
@@ -512,12 +557,15 @@ void idleFunc()
     // Atualiza o ângulo de rotação
     mover_agua += 0.01;
     mover_folhas += 0.01;
+    mover_terrestre_1 += rand() % 2 * 0.01;
     // Redesenha a cena
     glutPostRedisplay();
 }
 int main(int argc, char **argv)
 {
+
     lerArquivo("entrada.txt", X, Y, Z, ilha, lagos, terrestres_1, terrestres_2, plantas_1, plantas_2);
+    inicializaColisao(colisao, X, Y);
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(1280, 720);
