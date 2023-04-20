@@ -1,7 +1,7 @@
 cena 10 10 10
-ilha 10
+ilha 50
 lagos 80
-terrestres_1 10 
+terrestres_1 1 
 terrestres_2 5 
-plantas_1 15
-plantas_2 500
+plantas_1 10
+plantas_2 100

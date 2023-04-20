@@ -17,6 +17,7 @@ float terrestres_1;
 float terrestres_2;
 float plantas_1;
 float plantas_2;
+float last = 0;
 
 struct Bloco
 {
@@ -105,12 +106,12 @@ void lerArquivo(std::string nome_arquivo, float &saida_X, float &saida_Y, float 
 
 void inicializaColisao(Bloco **&colisao, int X, int Y)
 {
-    colisao = new Bloco *[(int)X * 2];
+    colisao = new Bloco *[(int)X];
 
-    for (int i = 0; i < X * 2; i++)
+    for (int i = 0; i < X; i++)
     {
-        colisao[i] = new Bloco[(int)Y * 2];
-        for (int j = 0; j < Y * 2; j++)
+        colisao[i] = new Bloco[(int)Y];
+        for (int j = 0; j < Y; j++)
         {
             colisao[i][j].colisao = false;
             colisao[i][j].altura = 0;
@@ -119,9 +120,9 @@ void inicializaColisao(Bloco **&colisao, int X, int Y)
 }
 void imprimirMatrizColisao(Bloco **colisao, int X, int Y)
 {
-    for (int j = Y * 2 - 1; j >= 0; j--)
+    for (int j = Y - 1; j >= 0; j--)
     {
-        for (int i = 0; i < X * 2; i++)
+        for (int i = 0; i < X; i++)
         {
             if (colisao[i][j].colisao)
                 std::cout << "X";
@@ -133,6 +134,14 @@ void imprimirMatrizColisao(Bloco **colisao, int X, int Y)
     }
     std::cout << "\n"
               << std::endl;
+}
+
+void inserirMatrizColisao(Bloco **colisao, int X, int Y)
+{
+
+    colisao[X][Y].altura = sin(X) * cos(Y) + 1.5;
+
+    colisao[X][Y].colisao = true;
 }
 
 void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloat cor[3])
@@ -205,21 +214,40 @@ void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloa
     glEnd();
 };
 
-float mover_terrestre_1;
-
-void terrestre_1(float x, float y, float z, Bloco **colisao)
+void terrestre_1(Bloco **colisao)
 {
 
     GLfloat cor[3] = {1, 0, 0};
     GLfloat borda[3] = {1, 1, 1};
-    desenhaCubo(x + 0.125 + mover_terrestre_1, y + 0.125, z + 0.25, 0.25, borda, cor);
+    int atualX, atualY;
+    int novoX, novoY;
+    int i;
+    do
+    {
+        atualX = rand() % (int)X;
+        atualY = rand() % (int)Y;
+    } while (!colisao[atualX][atualY].colisao);
+
+    desenhaCubo(atualX, atualY, colisao[atualX][atualY].altura + 0.5, 0.375, borda, cor);
+    colisao[atualX][atualY].colisao = false;
 }
 
-void terrestre_2(float x, float y, float z)
+void terrestre_2(Bloco **colisao)
 {
+
     GLfloat cor[3] = {0, 0, 1};
     GLfloat borda[3] = {1, 1, 1};
-    desenhaCubo(x + 0.125, y + 0.125, z + 1, 0.25, borda, cor);
+    int atualX, atualY;
+    int novoX, novoY;
+    int i;
+    do
+    {
+        atualX = rand() % (int)X;
+        atualY = rand() % (int)Y;
+    } while (!colisao[atualX][atualY].colisao);
+
+    desenhaCubo(atualX, atualY, colisao[atualX][atualY].altura + 0.5, 0.375, borda, cor);
+    colisao[atualX][atualY].colisao = false;
 }
 
 void base(float X, float Y, float Z)
@@ -311,7 +339,7 @@ bool haCelulasLivres(bool **areaOcupada, int Y, int X)
 void arbusto(float x, float y, float z)
 {
     GLfloat borda[3] = {1, 1, 1};
-    GLfloat folha[3] = {0, 128, 0};
+    GLfloat folha[3] = {58.0f / 255, 99.0f / 255, 50.0f / 255};
 
     desenhaCubo(x + 0.125, y + 0.125, z, 0.25, borda, folha);
 }
@@ -321,14 +349,16 @@ void coqueiro(float x, float y, float z)
 {
 
     GLfloat borda[3] = {1, 1, 1};
-    GLfloat folha[3] = {0, 128, 0};
-    GLfloat madeira[3] = {141.0f / 255, 90.0f / 255, 0.0f};
+    GLfloat folha[3] = {58.0f / 255, 99.0f / 255, 50.0f / 255};
+    GLfloat bordatronco[3] = {0, 0, 0};
+
+    GLfloat madeira[3] = {115.0f / 255, 96.0f / 255, 81.0f / 255};
 
     float aux = 0.25;
     float aleatorio = rand() % (int)z / 2;
     while (aux < aleatorio + 5)
     {
-        desenhaCubo(x + 0.125, y + 0.125, aux, 0.25, borda, madeira);
+        desenhaCubo(x + 0.125, y + 0.125, aux, 0.25, bordatronco, madeira);
         aux += 0.25;
     }
     desenhaCubo(x + cos(mover_folhas) / 2 / 4, y, aux + 0.25, 0.5, borda, folha);
@@ -366,15 +396,28 @@ void coqueiro(float x, float y, float z)
     desenhaCubo(x - 0.25 + cos(mover_folhas) / 2 / 10, y + 0.25, aux - 1, 0.5, borda, folha);
 }
 
+bool stopRand = true;
+float idle = 0;
 void terra(float porcentagem, int coqueiros, int arbustos)
 {
     int numCubos = ceil(porcentagem * area() / 100 / 2);
     int numArbusto = arbustos;
-    GLfloat cor[3] = {141.0f / 255, 90.0f / 255, 0.0f};
+    GLfloat cor[3] = {56.0f / 255, 41.0f / 255, 26.0f / 255};
     GLfloat borda[3] = {0, 0, 0};
     int coqueirosCont = 0;
     int arbustosCont = 0;
-    srand((X * Y * Z));
+    int colisCont = 0;
+
+    if (stopRand)
+    {
+
+        srand(idle);
+        last = idle;
+    }
+    else
+    {
+        srand(last);
+    }
 
     bool **areaOcupada = new bool *[(int)X * 2];
     for (int i = 0; i < X * 2; i++)
@@ -385,7 +428,6 @@ void terra(float porcentagem, int coqueiros, int arbustos)
             areaOcupada[i][j] = false;
         }
     }
-
     for (float i = 0; i < numCubos && haCelulasLivres(areaOcupada, X, Y); i += 0.5)
     {
         int aleatorioX, aleatorioY;
@@ -396,10 +438,8 @@ void terra(float porcentagem, int coqueiros, int arbustos)
         } while (areaOcupada[aleatorioX][aleatorioY]);
 
         areaOcupada[aleatorioX][aleatorioY] = true;
-        colisao[aleatorioX][aleatorioY].altura = sin(aleatorioX) * cos(aleatorioY) + 1.5;
-        colisao[aleatorioX][aleatorioY].colisao = true;
-        terrestre_1(aleatorioX, aleatorioY, sin(aleatorioX) * cos(aleatorioY) + 2, colisao);
 
+        inserirMatrizColisao(colisao, aleatorioX, aleatorioY);
         float centroX = aleatorioX;
         float centroY = aleatorioY;
 
@@ -520,6 +560,9 @@ void keyboard(unsigned char key, int x, int y)
         // virar a câmera para a direita
         rotate += 1;
         break;
+    case 'q':
+        stopRand = !stopRand;
+        break;
     }
 }
 
@@ -541,14 +584,22 @@ void display()
     double cameraTargetX = X / 2 + sin(cameraAngleY) * cos(cameraAngleX);
     double cameraTargetY = Y / 2 + sin(cameraAngleX);
     double cameraTargetZ = Z / 2 - cos(cameraAngleY) * cos(cameraAngleX);
-    gluLookAt(cameraX, cameraY, cameraZ, cameraTargetX, cameraTargetY + rotate, cameraTargetZ, 0, 0, 1);
+    gluLookAt(cameraX, cameraY, cameraZ, cameraTargetX, cameraTargetY, cameraTargetZ, 0, 0, 1);
     drawAxes(5.0f);
 
-    glRotatef(6 * rotateKey, 0, 0, 1);
+    glRotatef(0 + rotate, 0, 0, 1);
     base(X, Y, Z);
     agua();
-    terra(ilha, plantas_1, plantas_2); // colocar entradas ainda
-    // imprimirMatrizColisao(colisao, X, Y);
+    terra(ilha, plantas_1, plantas_2);
+    for (int i = 0; i < terrestres_1; i++)
+    {
+        terrestre_1(colisao);
+    }
+    for (int i = 0; i < terrestres_2; i++)
+    {
+        terrestre_2(colisao);
+    }
+
     glutSwapBuffers();
 }
 
@@ -557,7 +608,7 @@ void idleFunc()
     // Atualiza o ângulo de rotação
     mover_agua += 0.01;
     mover_folhas += 0.01;
-    mover_terrestre_1 += rand() % 2 * 0.01;
+    idle += 0.01;
     // Redesenha a cena
     glutPostRedisplay();
 }
