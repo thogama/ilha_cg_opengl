@@ -146,7 +146,23 @@ void inserirMatrizColisao(Bloco **colisao, int X, int Y)
 
 void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloat cor[3])
 {
+    GLfloat ambient[] = {0.5f, 0.5f, 0.5f, 1.0f};
+    GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 0};
+    GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat position[] = {x + lado / 2, y + lado / 2, z + lado * 2, 1};
+
+    // glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, cor);
+
     glColor3f(borda[0], borda[1], borda[2]);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glEnable(GL_POLYGON_OFFSET_LINE);
+    glPolygonOffset(-1, -1);
+
     glBegin(GL_LINE_STRIP);
 
     glVertex3f(x, y, z);
@@ -179,6 +195,8 @@ void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloa
     glVertex3f(x + lado, y + lado, z + lado);
     glVertex3f(x + lado, y, z + lado);
     glEnd();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDisable(GL_POLYGON_OFFSET_LINE);
     glColor3f(cor[0], cor[1], cor[2]);
     glBegin(GL_QUADS);
 
@@ -222,6 +240,7 @@ void terrestre_1(Bloco **colisao)
     int atualX, atualY;
     int novoX, novoY;
     int i;
+    srand(time(NULL));
     do
     {
         atualX = rand() % (int)X;
@@ -571,6 +590,9 @@ void display()
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Habilitar iluminação
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
