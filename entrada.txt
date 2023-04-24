@@ -1,6 +1,6 @@
 cena 10 10 10
-ilha 50
-lagos 12312321312312
+ilha 25
+lagos 999999
 terrestres_1 10
 terrestres_2 10
 plantas_1 100
