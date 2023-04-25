@@ -28,6 +28,9 @@ struct Vertex
 std::vector<Vertex> vertices;
 std::vector<GLuint> indices;
 
+std::vector<Vertex> vertices2;
+std::vector<GLuint> indices2;
+
 struct Bloco
 {
     bool colisao;
@@ -200,7 +203,7 @@ void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloa
     glEnd();
 };
 
-void loadOBJ(const char *filename)
+void loadOBJ1(const char *filename)
 {
     std::ifstream in(filename);
     if (!in)
@@ -261,6 +264,67 @@ void loadOBJ(const char *filename)
     in.close();
 }
 
+void loadOBJ2(const char *filename)
+{
+    std::ifstream in(filename);
+    if (!in)
+    {
+        std::cerr << "Cannot open " << filename << std::endl;
+        exit(1);
+    }
+
+    char buffer[500000];
+    while (in.getline(buffer, sizeof(buffer)))
+    {
+        std::stringstream line(buffer);
+        std::string cmd;
+        line >> cmd;
+
+        if (cmd == "v")
+        {
+            Vertex v;
+            line >> v.x >> v.y >> v.z;
+            v.nx = v.ny = v.nz = 0.0f;
+            vertices2.push_back(v);
+        }
+        else if (cmd == "vn")
+        {
+            int idx;
+            line >> idx;
+            line >> vertices2[idx - 1].nx >> vertices2[idx - 1].ny >> vertices2[idx - 1].nz;
+        }
+        else if (cmd == "f")
+        {
+            GLuint idx;
+            while (line >> idx)
+            {
+                indices2.push_back(idx - 1);
+                char c = line.peek();
+                if (c == '/')
+                {
+                    line.ignore();
+                    if (line.peek() != '/')
+                    {
+                        // read texture coordinate index
+                        line >> idx;
+                    }
+                    line.ignore();
+                    if (line.peek() != ' ')
+                    {
+                        // read vertex normal index
+                        line >> idx;
+                        vertices2[indices2.back()].nx = vertices2[idx - 1].nx;
+                        vertices2[indices2.back()].ny = vertices2[idx - 1].ny;
+                        vertices2[indices2.back()].nz = vertices2[idx - 1].nz;
+                    }
+                }
+            }
+        }
+    }
+
+    in.close();
+}
+
 void human(std::vector<GLuint> indices, std::vector<Vertex> vertices, GLfloat entra_x, GLfloat entra_y, GLfloat entra_z)
 {
     GLfloat cor[3] = {125.0f / 255, 91.0f / 255, 140.0f / 255};
@@ -276,6 +340,30 @@ void human(std::vector<GLuint> indices, std::vector<Vertex> vertices, GLfloat en
     glMaterialfv(GL_FRONT, GL_DIFFUSE, cor);
 
     glBegin(GL_QUADS);
+    for (int i = 0; i < indices.size(); i++)
+    {
+        glColor3f(cor[0], cor[1], cor[2]);
+        Vertex v = vertices[indices[i]];
+        glVertex3f(v.x / 15 + entra_x, v.y / 15 + entra_y, v.z / 15 + entra_z);
+    }
+    glEnd();
+}
+
+void animal(std::vector<GLuint> indices, std::vector<Vertex> vertices, GLfloat entra_x, GLfloat entra_y, GLfloat entra_z)
+{
+    GLfloat cor[3] = {215.0f / 255, 84.0f / 255, 19.0f / 255};
+
+    GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 0};
+    GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat position[] = {entra_x, entra_y, entra_z * 2, 1};
+
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, cor);
+
+    glBegin(GL_POLYGON);
     for (int i = 0; i < indices.size(); i++)
     {
         glColor3f(cor[0], cor[1], cor[2]);
@@ -306,9 +394,6 @@ void terrestre_1(Bloco **colisao)
 
 void terrestre_2(Bloco **colisao)
 {
-
-    GLfloat cor[3] = {0, 0, 1};
-    GLfloat borda[3] = {1, 1, 1};
     int atualX, atualY;
     int novoX, novoY;
     int i;
@@ -318,7 +403,7 @@ void terrestre_2(Bloco **colisao)
         atualY = rand() % (int)Y;
     } while (!colisao[atualX][atualY].colisao);
 
-    desenhaCubo(atualX, atualY, colisao[atualX][atualY].altura + 0.5, 0.375, borda, cor);
+    animal(indices2, vertices2, atualX, atualY + 0.25, colisao[atualX][atualY].altura + 0.25);
     colisao[atualX][atualY].colisao = false;
 }
 
@@ -688,7 +773,8 @@ void idleFunc()
 }
 int main(int argc, char **argv)
 {
-    loadOBJ("human.obj");
+    loadOBJ1("human.obj");
+    loadOBJ2("animal.obj");
     lerArquivo("entrada.txt", X, Y, Z, ilha, lagos, terrestres_1, terrestres_2, plantas_1, plantas_2);
     inicializaColisao(colisao, X, Y);
     glutInit(&argc, argv);

@@ -3,5 +3,5 @@ ilha 15
 lagos 999999
 terrestres_1 5
 terrestres_2 1
-plantas_1 100
-plantas_2 100
+plantas_1 10
+plantas_2 10
