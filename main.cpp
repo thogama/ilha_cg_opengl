@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-
+#include <vector>
 // gcc main.cpp -o main -lGL -lGLU -lglut -- para rodar
 
 float X;
@@ -18,6 +18,15 @@ float terrestres_2;
 float plantas_1;
 float plantas_2;
 float last = 0;
+
+struct Vertex
+{
+    GLfloat x, y, z;
+    GLfloat nx, ny, nz;
+};
+
+std::vector<Vertex> vertices;
+std::vector<GLuint> indices;
 
 struct Bloco
 {
@@ -146,57 +155,16 @@ void inserirMatrizColisao(Bloco **colisao, int X, int Y)
 
 void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloat cor[3])
 {
-    GLfloat ambient[] = {0.5f, 0.5f, 0.5f, 1.0f};
     GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 0};
     GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
     GLfloat position[] = {x + lado / 2, y + lado / 2, z + lado * 2, 1};
 
-    // glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
 
     glMaterialfv(GL_FRONT, GL_DIFFUSE, cor);
 
-    glColor3f(borda[0], borda[1], borda[2]);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glEnable(GL_POLYGON_OFFSET_LINE);
-    glPolygonOffset(-1, -1);
-
-    glBegin(GL_LINE_STRIP);
-
-    glVertex3f(x, y, z);
-    glVertex3f(x + lado, y, z);
-    glVertex3f(x + lado, y + lado, z);
-    glVertex3f(x, y + lado, z);
-
-    glVertex3f(x, y, z + lado);
-    glVertex3f(x, y + lado, z + lado);
-    glVertex3f(x + lado, y + lado, z + lado);
-    glVertex3f(x + lado, y, z + lado);
-
-    glVertex3f(x, y, z);
-    glVertex3f(x, y, z + lado);
-    glVertex3f(x + lado, y, z + lado);
-    glVertex3f(x + lado, y, z);
-
-    glVertex3f(x, y + lado, z);
-    glVertex3f(x + lado, y + lado, z);
-    glVertex3f(x + lado, y + lado, z + lado);
-    glVertex3f(x, y + lado, z + lado);
-
-    glVertex3f(x, y, z);
-    glVertex3f(x, y + lado, z);
-    glVertex3f(x, y + lado, z + lado);
-    glVertex3f(x, y, z + lado);
-
-    glVertex3f(x + lado, y, z);
-    glVertex3f(x + lado, y + lado, z);
-    glVertex3f(x + lado, y + lado, z + lado);
-    glVertex3f(x + lado, y, z + lado);
-    glEnd();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glDisable(GL_POLYGON_OFFSET_LINE);
     glColor3f(cor[0], cor[1], cor[2]);
     glBegin(GL_QUADS);
 
@@ -232,6 +200,91 @@ void desenhaCubo(float x, float y, float z, float lado, GLfloat borda[3], GLfloa
     glEnd();
 };
 
+void loadOBJ(const char *filename)
+{
+    std::ifstream in(filename);
+    if (!in)
+    {
+        std::cerr << "Cannot open " << filename << std::endl;
+        exit(1);
+    }
+
+    char buffer[1024];
+    while (in.getline(buffer, sizeof(buffer)))
+    {
+        std::stringstream line(buffer);
+        std::string cmd;
+        line >> cmd;
+
+        if (cmd == "v")
+        {
+            Vertex v;
+            line >> v.x >> v.y >> v.z;
+            v.nx = v.ny = v.nz = 0.0f;
+            vertices.push_back(v);
+        }
+        else if (cmd == "vn")
+        {
+            int idx;
+            line >> idx;
+            line >> vertices[idx - 1].nx >> vertices[idx - 1].ny >> vertices[idx - 1].nz;
+        }
+        else if (cmd == "f")
+        {
+            GLuint idx;
+            while (line >> idx)
+            {
+                indices.push_back(idx - 1);
+                char c = line.peek();
+                if (c == '/')
+                {
+                    line.ignore();
+                    if (line.peek() != '/')
+                    {
+                        // read texture coordinate index
+                        line >> idx;
+                    }
+                    line.ignore();
+                    if (line.peek() != ' ')
+                    {
+                        // read vertex normal index
+                        line >> idx;
+                        vertices[indices.back()].nx = vertices[idx - 1].nx;
+                        vertices[indices.back()].ny = vertices[idx - 1].ny;
+                        vertices[indices.back()].nz = vertices[idx - 1].nz;
+                    }
+                }
+            }
+        }
+    }
+
+    in.close();
+}
+
+void human(std::vector<GLuint> indices, std::vector<Vertex> vertices, GLfloat entra_x, GLfloat entra_y, GLfloat entra_z)
+{
+    GLfloat cor[3] = {125.0f / 255, 91.0f / 255, 140.0f / 255};
+
+    GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 0};
+    GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat position[] = {entra_x, entra_y, entra_z * 2, 1};
+
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, cor);
+
+    glBegin(GL_QUADS);
+    for (int i = 0; i < indices.size(); i++)
+    {
+        glColor3f(cor[0], cor[1], cor[2]);
+        Vertex v = vertices[indices[i]];
+        glVertex3f(v.x / 15 + entra_x, v.y / 15 + entra_y, v.z / 15 + entra_z);
+    }
+    glEnd();
+}
+
 void terrestre_1(Bloco **colisao)
 {
 
@@ -247,7 +300,7 @@ void terrestre_1(Bloco **colisao)
         atualY = rand() % (int)Y;
     } while (!colisao[atualX][atualY].colisao);
 
-    desenhaCubo(atualX, atualY, colisao[atualX][atualY].altura + 0.5, 0.375, borda, cor);
+    human(indices, vertices, atualX, atualY + 0.25, colisao[atualX][atualY].altura + 0.25);
     colisao[atualX][atualY].colisao = false;
 }
 
@@ -589,7 +642,6 @@ void display()
 {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // Habilitar iluminação
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -636,7 +688,7 @@ void idleFunc()
 }
 int main(int argc, char **argv)
 {
-
+    loadOBJ("human.obj");
     lerArquivo("entrada.txt", X, Y, Z, ilha, lagos, terrestres_1, terrestres_2, plantas_1, plantas_2);
     inicializaColisao(colisao, X, Y);
     glutInit(&argc, argv);
